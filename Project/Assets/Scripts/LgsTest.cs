@@ -12,19 +12,31 @@ public class LgsTest : MonoBehaviour
     void OnGUI()
     {
         if (GUI.Button(new Rect(20, 20, 100, 50), "CaptureCamera"))
-            CaptureCamera();
+            StartCoroutine(CaptureTexture());
 
         if (GUI.Button(new Rect(20, 130, 100, 50), "GaussianBlur"))
-            StartCoroutine(CaptureTexture());
+            StartCoroutine(CaptureBlurTexture());
     }
 
     Texture tmpBgTex = null;
-    IEnumerator CaptureTexture()
+    IEnumerator CaptureBlurTexture()
     {
+        Clear();
+        oldBG.SetActive(true);
         RapidBlurEffect.RenderStart();
         yield return new WaitForEndOfFrame();
         CaptureCamera();
         RapidBlurEffect.RenderEnd();
+        oldBG.SetActive(false);
+    }
+
+    IEnumerator CaptureTexture()
+    {
+        Clear();
+        oldBG.SetActive(true);
+        yield return new WaitForEndOfFrame();
+        CaptureCamera();
+        yield return new WaitForEndOfFrame();
         oldBG.SetActive(false);
     }
 
@@ -34,12 +46,18 @@ public class LgsTest : MonoBehaviour
         texBG.mainTexture = tmpBgTex;
     }
 
-    void Destroy()
+    void Clear()
     {
         if (null != tmpBgTex)
         {
             Destroy(tmpBgTex);
             tmpBgTex = null;
+            texBG.mainTexture = null;
         }
+    }
+
+    void Destroy()
+    {
+        Clear();
     }
 }
